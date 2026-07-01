@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Appointments - HMS{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Appointments</h1>
+    <button class="btn btn-primary" id="addBtn">+ Book Appointment</button>
+</div>
+
+<div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th><th>Patient</th><th>Doctor</th><th>Date</th>
+                <th>Time</th><th>Status</th><th>Reason</th><th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <tr><td colspan="8" class="empty-row">Loading...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div id="formModal" class="modal-overlay hidden">
+    <div class="modal-box modal-form">
+        <h3 id="formTitle">Book Appointment</h3>
+        <form id="entityForm">
+            <input type="hidden" id="entityId">
+
+            <label>Patient</label>
+            <select id="f_patient_id" class="form-input" data-nav></select>
+
+            <label>Doctor</label>
+            <select id="f_doctor_id" class="form-input" data-nav></select>
+
+            <label>Date</label>
+            <input type="date" id="f_appointment_date" class="form-input" data-nav>
+
+            <label>Time</label>
+            <input type="time" id="f_appointment_time" class="form-input" data-nav>
+
+            <label>Status</label>
+            <select id="f_status" class="form-input" data-nav>
+                {% for s in status_options %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+            </select>
+
+            <label>Reason</label>
+            <input type="text" id="f_reason" class="form-input" data-nav>
+
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/form-nav.js') }}"></script>
+<script src="{{ url_for('static', filename='js/crud.js') }}"></script>
+<script>
+const fieldMap = {
+    f_patient_id: 'patient_id', f_doctor_id: 'doctor_id',
+    f_appointment_date: 'appointment_date', f_appointment_time: 'appointment_time',
+    f_status: 'status', f_reason: 'reason'
+};
+
+// populate patient/doctor dropdowns from meta endpoint
+fetch('/api/appointments/meta').then(r => r.json()).then(meta => {
+    const pSel = document.getElementById('f_patient_id');
+    const dSel = document.getElementById('f_doctor_id');
+    pSel.innerHTML = meta.patients.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    dSel.innerHTML = meta.doctors.map(d => `<option value="${d.id}">${d.name} (${d.specialization || ''})</option>`).join('');
+});
+
+initCrudPage({
+    apiBase: '/api/appointments',
+    fieldMap: fieldMap,
+    entityLabel: 'Appointment',
+    renderRow: function(row) {
+        return `<tr>
+            <td>${row.id}</td>
+            <td>${row.patient_name || ''}</td>
+            <td>${row.doctor_name || ''}</td>
+            <td>${row.appointment_date || ''}</td>
+            <td>${row.appointment_time || ''}</td>
+            <td><span class="status-badge status-${(row.status||'').toLowerCase()}">${row.status || ''}</span></td>
+            <td>${row.reason || ''}</td>
+            <td>
+                <button class="btn btn-sm btn-edit" data-id="${row.id}">Edit</button>
+                <button class="btn btn-sm btn-danger" data-id="${row.id}">Delete</button>
+            </td>
+        </tr>`;
+    },
+    emptyColspan: 8
+});
+</script>
+{% endblock %}

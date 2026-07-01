@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - HMS{% endblock %}
+{% block content %}
+<h1 class="page-title">Welcome, {{ user.name }} <span class="role-badge role-{{ user.role|lower }}">{{ user.role }}</span></h1>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">🧑‍🤝‍🧑</div>
+        <div class="stat-num">{{ stats.patients }}</div>
+        <div class="stat-label">Patients</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🩺</div>
+        <div class="stat-num">{{ stats.doctors }}</div>
+        <div class="stat-label">Doctors</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-num">{{ stats.appointments }}</div>
+        <div class="stat-label">Appointments</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📋</div>
+        <div class="stat-num">{{ stats.records }}</div>
+        <div class="stat-label">Medical Records</div>
+    </div>
+</div>
+
+<div class="quick-links">
+    {% if user.role in ['Admin', 'Doctor'] %}
+    <a class="quick-link" href="{{ url_for('patients_page') }}">Manage Patients →</a>
+    {% endif %}
+    {% if user.role == 'Admin' %}
+    <a class="quick-link" href="{{ url_for('doctors_manage_page') }}">Manage Doctors →</a>
+    {% else %}
+    <a class="quick-link" href="{{ url_for('doctors_page') }}">View Doctors →</a>
+    {% endif %}
+    <a class="quick-link" href="{{ url_for('appointments_page') }}">Appointments →</a>
+    <a class="quick-link" href="{{ url_for('records_page') }}">Medical Records →</a>
+</div>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Doctors - HMS{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Doctors</h1>
+    {% if is_admin %}
+    <button class="btn btn-primary" id="addBtn">+ Add Doctor</button>
+    {% endif %}
+</div>
+
+<div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th><th>Name</th><th>Gender</th><th>Specialization</th>
+                <th>Experience</th><th>Phone</th><th>Email</th>
+                {% if is_admin %}<th>Actions</th>{% endif %}
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <tr><td colspan="8" class="empty-row">Loading...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+{% if is_admin %}
+<div id="formModal" class="modal-overlay hidden">
+    <div class="modal-box modal-form">
+        <h3 id="formTitle">Add Doctor</h3>
+        <form id="entityForm">
+            <input type="hidden" id="entityId">
+
+            <label>Name</label>
+            <input type="text" id="f_name" class="form-input" required data-nav>
+
+            <label>Gender</label>
+            <select id="f_gender" class="form-input" data-nav>
+                {% for g in genders %}<option value="{{ g }}">{{ g }}</option>{% endfor %}
+            </select>
+
+            <label>Specialization</label>
+            <select id="f_specialization" class="form-input" data-nav>
+                {% for s in specializations %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+            </select>
+
+            <label>Experience</label>
+            <select id="f_experience" class="form-input" data-nav>
+                {% for e in experiences %}<option value="{{ e }}">{{ e }}</option>{% endfor %}
+            </select>
+
+            <label>Phone</label>
+            <input type="text" id="f_phone" class="form-input" data-nav>
+
+            <label>Email</label>
+            <input type="email" id="f_email" class="form-input" data-nav>
+
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/form-nav.js') }}"></script>
+<script src="{{ url_for('static', filename='js/crud.js') }}"></script>
+<script>
+const isAdmin = {{ 'true' if is_admin else 'false' }};
+const fieldMap = {
+    f_name: 'name', f_gender: 'gender', f_specialization: 'specialization',
+    f_experience: 'experience', f_phone: 'phone', f_email: 'email'
+};
+initCrudPage({
+    apiBase: '/api/doctors',
+    fieldMap: fieldMap,
+    entityLabel: 'Doctor',
+    readOnly: !isAdmin,
+    renderRow: function(row) {
+        return `<tr>
+            <td>${row.id}</td>
+            <td>${row.name || ''}</td>
+            <td>${row.gender || ''}</td>
+            <td>${row.specialization || ''}</td>
+            <td>${row.experience || ''}</td>
+            <td>${row.phone || ''}</td>
+            <td>${row.email || ''}</td>
+            ${isAdmin ? `<td>
+                <button class="btn btn-sm btn-edit" data-id="${row.id}">Edit</button>
+                <button class="btn btn-sm btn-danger" data-id="${row.id}">Delete</button>
+            </td>` : ''}
+        </tr>`;
+    },
+    emptyColspan: 8
+});
+</script>
+{% endblock %}

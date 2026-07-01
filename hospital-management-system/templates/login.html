@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Login - HMS{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+    <form class="auth-card" id="loginForm" method="POST" action="{{ url_for('login') }}">
+        <h2>Welcome Back</h2>
+        <p class="auth-sub">Login to Hospital Management System</p>
+
+        <label>Email</label>
+        <input type="email" name="email" class="form-input" required autofocus data-nav>
+
+        <label>Password</label>
+        <input type="password" name="password" class="form-input" required data-nav>
+
+        <button type="submit" class="btn btn-primary btn-block">Login</button>
+        <p class="auth-foot">No account? <a href="{{ url_for('register') }}">Register here</a></p>
+        <p class="auth-hint">Demo Admin: admin@hms.com / admin123</p>
+    </form>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/form-nav.js') }}"></script>
+<script>initFormKeyboardNav('loginForm');</script>
+{% endblock %}

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Hospital Management System{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+{% if user %}
+<header class="topbar">
+    <div class="brand">🏥 HMS</div>
+    <nav class="navlinks">
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        {% if user.role in ['Admin', 'Doctor'] %}
+            <a href="{{ url_for('patients_page') }}">Patients</a>
+        {% endif %}
+        {% if user.role == 'Admin' %}
+            <a href="{{ url_for('doctors_manage_page') }}">Doctors</a>
+        {% elif user.role == 'Patient' %}
+            <a href="{{ url_for('doctors_page') }}">Doctors</a>
+        {% endif %}
+        <a href="{{ url_for('appointments_page') }}">Appointments</a>
+        <a href="{{ url_for('records_page') }}">Medical Records</a>
+    </nav>
+    <div class="userbox">
+        <span class="role-badge role-{{ user.role|lower }}">{{ user.role }}</span>
+        <span class="uname">{{ user.name }}</span>
+        <a href="{{ url_for('logout') }}" id="logoutBtn" class="btn-logout">Logout</a>
+    </div>
+</header>
+{% endif %}
+
+<main class="content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-wrap">
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+</main>
+
+<!-- Confirmation modal (used by cancel-confirm and delete-confirm) -->
+<div id="confirmModal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <p id="confirmModalText">Are you sure?</p>
+        <div class="modal-actions">
+            <button id="confirmModalYes" class="btn btn-danger">Yes</button>
+            <button id="confirmModalNo" class="btn btn-secondary">No</button>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Medical Records - HMS{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Medical Records</h1>
+    {% if user.role in ['Admin', 'Doctor'] %}
+    <button class="btn btn-primary" id="addBtn">+ Add Record</button>
+    {% endif %}
+</div>
+
+<div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th><th>Patient</th><th>Doctor</th><th>Diagnosis</th>
+                <th>Prescription</th><th>Notes</th><th>Date</th>
+                {% if user.role in ['Admin', 'Doctor'] %}<th>Actions</th>{% endif %}
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <tr><td colspan="8" class="empty-row">Loading...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+{% if user.role in ['Admin', 'Doctor'] %}
+<div id="formModal" class="modal-overlay hidden">
+    <div class="modal-box modal-form">
+        <h3 id="formTitle">Add Medical Record</h3>
+        <form id="entityForm">
+            <input type="hidden" id="entityId">
+
+            <label>Patient</label>
+            <select id="f_patient_id" class="form-input" data-nav></select>
+
+            <label>Diagnosis</label>
+            <input type="text" id="f_diagnosis" class="form-input" data-nav>
+
+            <label>Prescription</label>
+            <input type="text" id="f_prescription" class="form-input" data-nav>
+
+            <label>Notes</label>
+            <input type="text" id="f_notes" class="form-input" data-nav>
+
+            <label>Date</label>
+            <input type="date" id="f_record_date" class="form-input" data-nav>
+
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/form-nav.js') }}"></script>
+<script src="{{ url_for('static', filename='js/crud.js') }}"></script>
+<script>
+const canEdit = {{ 'true' if user.role in ['Admin', 'Doctor'] else 'false' }};
+const fieldMap = {
+    f_patient_id: 'patient_id', f_diagnosis: 'diagnosis',
+    f_prescription: 'prescription', f_notes: 'notes', f_record_date: 'record_date'
+};
+
+if (canEdit) {
+    fetch('/api/appointments/meta').then(r => r.json()).then(meta => {
+        const pSel = document.getElementById('f_patient_id');
+        pSel.innerHTML = meta.patients.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    });
+}
+
+initCrudPage({
+    apiBase: '/api/records',
+    fieldMap: fieldMap,
+    entityLabel: 'Record',
+    readOnly: !canEdit,
+    renderRow: function(row) {
+        return `<tr>
+            <td>${row.id}</td>
+            <td>${row.patient_name || ''}</td>
+            <td>${row.doctor_name || ''}</td>
+            <td>${row.diagnosis || ''}</td>
+            <td>${row.prescription || ''}</td>
+            <td>${row.notes || ''}</td>
+            <td>${row.record_date || ''}</td>
+            ${canEdit ? `<td>
+                <button class="btn btn-sm btn-edit" data-id="${row.id}">Edit</button>
+                <button class="btn btn-sm btn-danger" data-id="${row.id}">Delete</button>
+            </td>` : ''}
+        </tr>`;
+    },
+    emptyColspan: 8
+});
+</script>
+{% endblock %}
