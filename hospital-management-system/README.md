@@ -29,7 +29,7 @@ pip install flask flask_sqlalchemy
 python app.py
 ```
 
-The app runs at http://localhost:5000
+
 
 A default Admin account is auto-seeded:
 - Email: `admin@hms.com`
